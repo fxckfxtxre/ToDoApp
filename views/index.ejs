@@ -1,12 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>App</title>
+
+    <style>
+        .center{
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
-<body>
-    <h1>xui</h1>
+
+<body class="bg-dark">
+    <div class="container">
+        <div class="center">
+            <div class="content">
+                <div class="input-group  mb-3">
+                    <input id="name" type="text" class="form-control" placeholder="New" aria-label="Recipient's username" aria-describedby="button-addon2">
+                    <button onclick="newObj()" class="btn btn-success" type="button" id="button-addon2">Add</button>
+                </div>
+                
+                <div class="panel panel-default">
+                    <table id="table" class="table table-dark table-striped table-bordered" style="border-radius: 10px;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Title</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const table = document.querySelector("#table tbody");
+        let items = [];
+        window.onload = fetchAll();
+        
+        async function fetchAll () {
+            let response = await fetch("/api/list", {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                }
+            });
+
+            if (response.ok === true) {
+                let data = await response.json();
+
+                items = data;
+            }
+
+            buildTable();
+        };
+
+        function buildTable(){
+            let content = ""
+            for (let index = 0; index < items.length; index++) {
+                const element = items[index];
+                
+                content += `<tr><td scope='row'>${element.title}</th><td><button onclick="deleteObj(${element.id})" class='btn btn-sm btn-outline-danger'>Delete</button></td></tr>`;
+            }
+
+            table.innerHTML = content;
+
+            console.log(`Table builded with ${items.length} items.`);
+        }
+
+        async function newObj(){
+            let nameObj = document.querySelector("#name").value
+            document.querySelector("#name").value = "";
+
+            let response = await fetch("/api/list", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json", "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    title: nameObj
+                })
+            });
+
+            fetchAll();
+        };
+
+    
+
+        async function deleteObj(id){
+            let response = await fetch(`/api/list/${id}`, {
+                method: "DELETE",
+            });
+
+            fetchAll();
+        };
+    </script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
